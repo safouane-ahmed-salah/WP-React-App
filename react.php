@@ -4,7 +4,7 @@
  * @version 1.0.0
  */
 /*
-Plugin Name: React App shortcode or single page
+Plugin Name: Embed React App
 Description: Embed your react app in wordpress or create single page react app.
 Author: Safouane Ahmed Salah
 Version: 1.0.0
