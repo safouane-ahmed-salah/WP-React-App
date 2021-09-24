@@ -12,8 +12,6 @@ Version: 1.0.0
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
-define('REACT_BUILD_DIR', __DIR__.'/releases/');
-
 /* react custom post type */
 add_action('init', 'react_create_post_type'); 
 function react_create_post_type() {
@@ -22,7 +20,7 @@ function react_create_post_type() {
         'public' => true, /* shows in admin on left menu etc */    
         'publicly_queryable' => true, 
         'menu_icon'=> '//img.icons8.com/officel/16/000000/react.png',
-        'supports' => array( 'title'),  
+        'supports' => array('title'),  
     );
     register_post_type('react', $args);
 }
@@ -40,8 +38,9 @@ function react_template() {
 }
 
 //functions
-function react_get_build_dir($postId){
-    return REACT_BUILD_DIR.'/'.$postId.'/build';
+function react_get_build_dir($postId, $key = 'basedir', $path = '/build'){
+  $upload_dir = wp_upload_dir();
+  return $upload_dir[$key].'/reactapp/'.$postId.$path;
 }
 function react_get_manifest($id, $key){
   $manifest_file = react_get_build_dir($id).'/asset-manifest.json';
@@ -100,12 +99,12 @@ function react_shortcode_column_echo($column, $postId) {
 
 
 function react_instruction($post){
-  if(!$post) return print('Must save to view instruction');
-
-  echo '<div>
-   <div>To get this working you need to follow the bellow steps steps:</div>
+  echo '<style>
+  #react-instruction code{border: 1px solid;white-space: pre;background: #000;display: block;margin:5px 0;color:orange;border-radius:4px }
+  </style><div class="react-instruction">
+   <div>To get this working. before you build your app, you need to follow the bellow steps:</div>
    <ol>
-    <li><b>npm i react-app-rewired --save-dev</b>/li>
+    <li><b>npm i react-app-rewired --save-dev</b></li>
     <li>Create config-overrides.js file in root directory or react app with content<br>
     <code type="js">
         module.exports = function override(config, env) {
@@ -125,10 +124,10 @@ function react_instruction($post){
     "test": "react-app-rewired test",
     </code> </li>
     <li>add homepage to package.json to <br><code>
-    "homepage": "'.plugins_url('/',react_get_build_dir($post->ID).'/test.ss').'",
+    "homepage": "'.react_get_build_dir($post->ID, 'baseurl').'",
     </code> </li>
     <li> root id: <b>'.react_get_html_id($post->ID).'</b> <br><small>set dom access id in src/index.js and public/index.html</small></li>
-    <li>after you create your react-app. <br>
+    <li>Build your react-app. <br>
       - <code>npm run build</code><br>
       - zip the build folder<br>
       - upload the build here
@@ -155,18 +154,15 @@ function react_build(){
 }
 
 function react_admin_shortcode($post){
-  if(!$post) return;
   echo '<input readonly onfocus="this.select()" style="width:100%;padding:5px" value="'. esc_attr(react_get_shortcode($post->ID)) .'"/>';
 }
 
 function react_preview($post){
-  if(!$post) return;
   echo do_shortcode(react_get_shortcode($post->ID));
 } 
 
 add_action('save_post_react', 'react_deploy');
 function react_deploy($postId){
-
   //disabled
   update_post_meta($postId, 'disabled', isset($_POST['disabled']) ? 1 : 0);
 
@@ -181,7 +177,7 @@ function react_deploy($postId){
   $tmp_file = @$file['tmp_name'];
   if(!$tmp_file) return;
   
-  $path = REACT_BUILD_DIR.'/'. $postId . '/';
+  $path = react_get_build_dir($postId, 'basedir', '');
   wp_mkdir_p($path);
   unzip_file( $tmp_file, $path);
 }
