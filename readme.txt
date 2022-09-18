@@ -16,4 +16,4 @@ Instruction on how to upload your react app:
  1- need to use npm package react-app-rewired
  2- add config-overrides.js to root directory of your react app
  3- upload the build to react post type
- 4- shortcode will be generated for your to embed the react app
+ 4- shortcode will be generated for you to embed the react app
